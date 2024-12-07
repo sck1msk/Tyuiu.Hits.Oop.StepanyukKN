@@ -1,0 +1,202 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+// Абстрактный класс Component
+public abstract class Component
+{
+    public string Name { get; set; }
+    public decimal Price { get; set; }
+
+    protected Component(string name, decimal price)
+    {
+        Name = name;
+        Price = price;
+    }
+
+    public virtual string GetInfo()
+    {
+        return $"Component: {Name}, Price: {Price:C}";
+    }
+
+    public override string ToString()
+    {
+        return GetInfo();
+    }
+}
+
+// Интерфейс Installable
+public interface Installable
+{
+    void Install();
+}
+
+// Конкретные классы
+public class CPU : Component, Installable
+{
+    public int Cores { get; set; }
+
+    public CPU(string name, decimal price, int cores) : base(name, price)
+    {
+        Cores = cores;
+    }
+
+    public override string GetInfo()
+    {
+        return $"{base.GetInfo()}, Cores: {Cores}";
+    }
+
+    public void Install()
+    {
+        Console.WriteLine($"{Name} (CPU) installed.");
+    }
+}
+
+public class RAM : Component, Installable
+{
+    public int SizeGB { get; set; }
+
+    public RAM(string name, decimal price, int sizeGB) : base(name, price)
+    {
+        SizeGB = sizeGB;
+    }
+
+    public override string GetInfo()
+    {
+        return $"{base.GetInfo()}, Size: {SizeGB} GB";
+    }
+
+    public void Install()
+    {
+        Console.WriteLine($"{Name} (RAM) installed.");
+    }
+}
+
+public class GPU : Component, Installable
+{
+    public int MemoryGB { get; set; }
+
+    public GPU(string name, decimal price, int memoryGB) : base(name, price)
+    {
+        MemoryGB = memoryGB;
+    }
+
+    public override string GetInfo()
+    {
+        return $"{base.GetInfo()}, Memory: {MemoryGB} GB";
+    }
+
+    public void Install()
+    {
+        Console.WriteLine($"{Name} (GPU) installed.");
+    }
+}
+
+public class HDD : Component, Installable
+{
+    public int CapacityGB { get; set; }
+
+    public HDD(string name, decimal price, int capacityGB) : base(name, price)
+    {
+        CapacityGB = capacityGB;
+    }
+
+    public override string GetInfo()
+    {
+        return $"{base.GetInfo()}, Capacity: {CapacityGB} GB";
+    }
+
+    public void Install()
+    {
+        Console.WriteLine($"{Name} (HDD) installed.");
+    }
+}
+
+// Класс Computer
+public class Computer
+{
+    private readonly List<Component> _components = new();
+
+    public void AddComponent<T>(T component) where T : Component
+    {
+        _components.Add(component);
+        Console.WriteLine($"{component.Name} added to the computer.");
+    }
+
+    public void RemoveComponent<T>(T component) where T : Component
+    {
+        if (_components.Remove(component))
+        {
+            Console.WriteLine($"{component.Name} removed from the computer.");
+        }
+        else
+        {
+            Console.WriteLine($"{component.Name} not found in the computer.");
+        }
+    }
+
+    public decimal GetTotalPrice()
+    {
+        return _components.Sum(c => c.Price);
+    }
+
+    public void GetInfo()
+    {
+        Console.WriteLine("Computer components:");
+        foreach (var component in _components)
+        {
+            Console.WriteLine(component);
+        }
+        Console.WriteLine($"Total Price: {GetTotalPrice():C}");
+    }
+}
+
+// Статический класс ComputerFactory
+public static class ComputerFactory
+{
+    public static Computer CreateGamingComputer()
+    {
+        var computer = new Computer();
+        computer.AddComponent(new CPU("Intel i9", 500, 16));
+        computer.AddComponent(new RAM("Corsair Vengeance", 150, 32));
+        computer.AddComponent(new GPU("NVIDIA RTX 3080", 700, 10));
+        computer.AddComponent(new HDD("Seagate Barracuda", 100, 2000));
+        return computer;
+    }
+
+    public static Computer CreateOfficeComputer()
+    {
+        var computer = new Computer();
+        computer.AddComponent(new CPU("Intel i5", 200, 4));
+        computer.AddComponent(new RAM("Kingston", 50, 8));
+        computer.AddComponent(new HDD("Western Digital Blue", 60, 1000));
+        return computer;
+    }
+}
+
+// Демонстрация
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        // Создание игровых и офисных компьютеров
+        var gamingComputer = ComputerFactory.CreateGamingComputer();
+        var officeComputer = ComputerFactory.CreateOfficeComputer();
+
+        // Вывод информации
+        Console.WriteLine("Gaming Computer:");
+        gamingComputer.GetInfo();
+        Console.WriteLine();
+
+        Console.WriteLine("Office Computer:");
+        officeComputer.GetInfo();
+        Console.WriteLine();
+
+        // Добавление и удаление компонентов
+        var extraRAM = new RAM("Extra RAM", 100, 16);
+        gamingComputer.AddComponent(extraRAM);
+        gamingComputer.GetInfo();
+        gamingComputer.RemoveComponent(extraRAM);
+        gamingComputer.GetInfo();
+    }
+}

@@ -1,0 +1,166 @@
+using System;
+using System.Collections.Generic;
+
+namespace SprintReview
+{
+    // Класс Product (Товар)
+    public class Product
+    {
+        // Поля
+        private string name;
+        private decimal price;
+        private int quantity;
+        protected string category;
+        internal string description;
+
+        // Свойства (геттеры и сеттеры)
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }
+
+        public decimal Price
+        {
+            get { return price; }
+            set { price = value; }
+        }
+
+        public int Quantity
+        {
+            get { return quantity; }
+            set { quantity = value; }
+        }
+
+        // Методы
+        public decimal GetTotalPrice()
+        {
+            return price * quantity;
+        }
+
+        public void UpdateQuantity(int amount)
+        {
+            quantity = amount;
+        }
+
+        public string GetProductInfo()
+        {
+            return $"Name: {name}, Price: {price:C}, Quantity: {quantity}, Category: {category}, Description: {description}";
+        }
+    }
+
+    // Класс Seller (Продавец)
+    public class Seller
+    {
+        // Поля
+        private string name;
+        private string employeeId;
+        protected decimal salary;
+        internal string contactInfo;
+
+        // Список товаров
+        private List<Product> products = new List<Product>();
+
+        // Свойства (геттеры и сеттеры)
+        public string Name
+        {
+            get { return name; }
+            set { name = value; }
+        }
+
+        // Методы
+        public void AddProduct(Product product)
+        {
+            products.Add(product);
+        }
+
+        public void SellProduct(Product product, int quantity)
+        {
+            if (product.Quantity >= quantity)
+            {
+                product.UpdateQuantity(product.Quantity - quantity);
+                Console.WriteLine($"{quantity} items of {product.Name} sold!");
+            }
+            else
+            {
+                Console.WriteLine($"Not enough {product.Name} in stock.");
+            }
+        }
+
+        public string GetSellerInfo()
+        {
+            return $"Seller: {name}, Employee ID: {employeeId}, Salary: {salary:C}, Contact: {contactInfo}";
+        }
+    }
+
+    // Класс Store (Магазин)
+    public class Store
+    {
+        // Поля
+        private string storeName;
+        private string location;
+        public string storeHours;
+
+        // Список продавцов
+        private List<Seller> sellers = new List<Seller>();
+
+        // Свойства (геттеры и сеттеры)
+        public string StoreName
+        {
+            get { return storeName; }
+            set { storeName = value; }
+        }
+
+        public string Location
+        {
+            get { return location; }
+            set { location = value; }
+        }
+
+        // Методы
+        public void AddSeller(Seller seller)
+        {
+            sellers.Add(seller);
+        }
+
+        public void ListProducts()
+        {
+            foreach (var seller in sellers)
+            {
+                Console.WriteLine(seller.GetSellerInfo());
+            }
+        }
+
+        public string GetStoreInfo()
+        {
+            return $"Store: {storeName}, Location: {location}, Hours: {storeHours}";
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            // Создание товаров
+            Product product1 = new Product { Name = "Laptop", Price = 1500.99m, Quantity = 10, category = "Electronics", description = "High-end gaming laptop" };
+            Product product2 = new Product { Name = "Smartphone", Price = 799.99m, Quantity = 20, category = "Electronics", description = "Latest model smartphone" };
+
+            // Создание продавца
+            Seller seller = new Seller { Name = "John Doe" };
+            seller.AddProduct(product1);
+            seller.AddProduct(product2);
+
+            // Создание магазина
+            Store store = new Store { StoreName = "Tech Store", Location = "Downtown", storeHours = "9 AM - 9 PM" };
+            store.AddSeller(seller);
+
+            // Вывод информации
+            Console.WriteLine(store.GetStoreInfo());
+            store.ListProducts();
+
+            // Продажа товара
+            seller.SellProduct(product1, 2);
+            Console.WriteLine(product1.GetProductInfo());
+        }
+    }
+}

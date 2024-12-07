@@ -1,0 +1,172 @@
+using System;
+using System.Collections.Generic;
+
+namespace OrderManagementSystem
+{
+    // Статус заказа
+    public enum OrderStatus
+    {
+        Created,
+        InProgress,
+        Completed
+    }
+
+    // Класс сотрудника
+    public class Employee
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string Position { get; set; }
+        public int OrdersProcessed { get; set; } = 0;
+
+        public override string ToString()
+        {
+            return $"{FirstName} {LastName}, {Position}, Orders Processed: {OrdersProcessed}";
+        }
+    }
+
+    // Класс заказчика
+    public class Customer
+    {
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public string PhoneNumber { get; set; }
+
+        public override string ToString()
+        {
+            return $"{FirstName} {LastName}, Phone: {PhoneNumber}";
+        }
+    }
+
+    // Класс заказа
+    public class Order
+    {
+        private static int NextOrderId = 1; // Генерация уникального ID
+        public int OrderId { get; private set; }
+        public string Description { get; set; }
+        public Employee AssignedEmployee { get; set; }
+        public OrderStatus Status { get; set; }
+        public DateTime CreatedAt { get; private set; }
+
+        public Order(string description)
+        {
+            OrderId = NextOrderId++;
+            Description = description;
+            Status = OrderStatus.Created;
+            CreatedAt = DateTime.Now;
+        }
+
+        public override string ToString()
+        {
+            return $"Order ID: {OrderId}, Description: {Description}, Status: {Status}, Assigned: {AssignedEmployee?.FirstName ?? "None"}, Created At: {CreatedAt}";
+        }
+    }
+
+    // Класс компании
+    public class Company
+    {
+        public string Name { get; set; }
+        public List<Employee> Employees { get; private set; } = new List<Employee>();
+        public List<Order> Orders { get; private set; } = new List<Order>();
+
+        // Событие для уведомления
+        public event Action<string> OnOrderStatusChanged;
+
+        // Добавление нового сотрудника
+        public void AddEmployee(Employee employee)
+        {
+            Employees.Add(employee);
+        }
+
+        // Создание заказа
+        public void CreateOrder(string description, Customer customer)
+        {
+            var order = new Order(description);
+            Orders.Add(order);
+            Console.WriteLine($"Order created: {order}");
+        }
+
+        // Назначение сотрудника на заказ
+        public void AssignEmployeeToOrder(int orderId, Employee employee)
+        {
+            var order = Orders.Find(o => o.OrderId == orderId);
+            if (order != null)
+            {
+                order.AssignedEmployee = employee;
+                Console.WriteLine($"Order {orderId} assigned to {employee.FirstName} {employee.LastName}");
+            }
+        }
+
+        // Изменение статуса заказа
+        public void ChangeOrderStatus(int orderId, OrderStatus newStatus)
+        {
+            var order = Orders.Find(o => o.OrderId == orderId);
+            if (order != null)
+            {
+                order.Status = newStatus;
+
+                // Уведомление
+                OnOrderStatusChanged?.Invoke($"Order {orderId} status changed to {newStatus}");
+
+                // Увеличение счётчика обработанных заказов
+                if (newStatus == OrderStatus.Completed && order.AssignedEmployee != null)
+                {
+                    order.AssignedEmployee.OrdersProcessed++;
+                }
+            }
+        }
+
+        // Просмотр заказов по статусу
+        public void ListOrdersByStatus(OrderStatus status)
+        {
+            foreach (var order in Orders)
+            {
+                if (order.Status == status)
+                {
+                    Console.WriteLine(order);
+                }
+            }
+        }
+
+        // Поиск заказов по заказчику
+        public void FindOrdersByCustomer(string customerName)
+        {
+            // Пример поиска. В текущей структуре Customer не связан с Order.
+            Console.WriteLine("This feature is not implemented yet.");
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var company = new Company { Name = "TechCorp" };
+
+            // Подписка на уведомления
+            company.OnOrderStatusChanged += message => Console.WriteLine($"Notification: {message}");
+
+            // Создание сотрудников
+            var employee1 = new Employee { FirstName = "John", LastName = "Doe", Position = "Manager" };
+            var employee2 = new Employee { FirstName = "Jane", LastName = "Smith", Position = "Developer" };
+            company.AddEmployee(employee1);
+            company.AddEmployee(employee2);
+
+            // Создание заказчика
+            var customer = new Customer { FirstName = "Alice", LastName = "Brown", PhoneNumber = "123-456-7890" };
+
+            // Создание заказа
+            company.CreateOrder("Website Development", customer);
+
+            // Назначение сотрудника на заказ
+            company.AssignEmployeeToOrder(1, employee2);
+
+            // Изменение статуса заказа
+            company.ChangeOrderStatus(1, OrderStatus.InProgress);
+            company.ChangeOrderStatus(1, OrderStatus.Completed);
+
+            // Список заказов по статусу
+            Console.WriteLine("\nCompleted Orders:");
+            company.ListOrdersByStatus(OrderStatus.Completed);
+        }
+    }
+}

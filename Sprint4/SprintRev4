@@ -1,0 +1,115 @@
+// Интерфейсы
+public interface IEnterprise
+{
+    void AddSupplier(ISupplier supplier);
+    void AddEmployee(IEmployee employee);
+    List<ISupplier> GetSuppliers();
+    decimal CalculateTotalExpenses();
+}
+
+public interface ISupplier
+{
+    string GetName();
+    decimal GetCost();
+    string SupplierType { get; set; }
+}
+
+public interface IEmployee
+{
+    string GetFullName();
+    decimal GetSalary();
+    string Position { get; set; }
+}
+
+// Реализация классов
+public class Supplier : ISupplier
+{
+    public string Name { get; set; }
+    public decimal Cost { get; set; }
+    public string SupplierType { get; set; }
+
+    public string GetName() => Name;
+    public decimal GetCost() => Cost;
+}
+
+public class Employee : IEmployee
+{
+    public string FullName { get; set; }
+    public decimal Salary { get; set; }
+    public string Position { get; set; }
+
+    public string GetFullName() => FullName;
+    public decimal GetSalary() => Salary;
+}
+
+public class Enterprise : IEnterprise
+{
+    private List<ISupplier> suppliers = new List<ISupplier>();
+    private List<IEmployee> employees = new List<IEmployee>();
+
+    public void AddSupplier(ISupplier supplier)
+    {
+        suppliers.Add(supplier);
+    }
+
+    public void AddEmployee(IEmployee employee)
+    {
+        employees.Add(employee);
+    }
+
+    public List<ISupplier> GetSuppliers() => suppliers;
+
+    public decimal CalculateTotalExpenses()
+    {
+        decimal totalExpenses = 0;
+
+        foreach (var supplier in suppliers)
+        {
+            totalExpenses += supplier.GetCost();
+        }
+
+        foreach (var employee in employees)
+        {
+            totalExpenses += employee.GetSalary();
+        }
+
+        return totalExpenses;
+    }
+
+    public void DisplayDetails()
+    {
+        Console.WriteLine("Список поставщиков:");
+        foreach (var supplier in suppliers)
+        {
+            Console.WriteLine($"{supplier.GetName()} - Стоимость услуги: {supplier.GetCost()}");
+        }
+
+        Console.WriteLine("\nСписок сотрудников:");
+        foreach (var employee in employees)
+        {
+            Console.WriteLine($"{employee.GetFullName()} - Должность: {employee.Position} - Зарплата: {employee.GetSalary()}");
+        }
+
+        Console.WriteLine($"\nОбщие расходы: {CalculateTotalExpenses()}");
+    }
+}
+
+// Пример использования
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        var enterprise = new Enterprise();
+
+        // Добавление поставщиков
+        enterprise.AddSupplier(new Supplier { Name = "Логистический центр", Cost = 100000, SupplierType = "Логистика" });
+        enterprise.AddSupplier(new Supplier { Name = "Поставщик офисной мебели", Cost = 50000, SupplierType = "Офисное оборудование" });
+
+        // Добавление сотрудников
+        enterprise.AddEmployee(new Employee { FullName = "Иван Иванов", Salary = 70000, Position = "Менеджер" });
+        enterprise.AddEmployee(new Employee { FullName = "Анна Петрова", Salary = 95000, Position = "Разработчик" });
+
+        // Вывод данных
+        enterprise.DisplayDetails();
+    }
+}

@@ -1,0 +1,107 @@
+using System;
+using System.Collections.Generic;
+
+// Базовый класс
+public class Employee
+{
+    public string Name { get; set; }
+    public string Position { get; set; }
+    public float Salary { get; set; }
+
+    public Employee(string name, string position, float salary)
+    {
+        Name = name;
+        Position = position;
+        Salary = salary;
+    }
+
+    public virtual void PrintInfo()
+    {
+        Console.WriteLine($"Name: {Name}, Position: {Position}, Salary: {Salary}");
+    }
+}
+
+// Класс Manager (Простое наследование)
+public class Manager : Employee
+{
+    public string Department { get; set; }
+
+    public Manager(string name, string position, float salary, string department)
+        : base(name, position, salary)
+    {
+        Department = department;
+    }
+
+    public override void PrintInfo()
+    {
+        base.PrintInfo();
+        Console.WriteLine($"Department: {Department}");
+    }
+}
+
+// Класс ProjectManager (Сложное наследование)
+public class ProjectManager : Manager, IReportable, ITeamLeader
+{
+    public string ProjectName { get; set; }
+
+    public ProjectManager(string name, string position, float salary, string department, string projectName)
+        : base(name, position, salary, department)
+    {
+        ProjectName = projectName;
+    }
+
+    public override void PrintInfo()
+    {
+        base.PrintInfo();
+        Console.WriteLine($"Project Name: {ProjectName}");
+    }
+
+    // Реализация интерфейса IReportable
+    public string GenerateReport()
+    {
+        return $"Report for Project: {ProjectName}";
+    }
+
+    // Реализация интерфейса ITeamLeader
+    public List<string> GetTeamMembers()
+    {
+        return new List<string> { "Member1", "Member2", "Member3" };
+    }
+}
+
+// Интерфейсы
+public interface IReportable
+{
+    string GenerateReport();
+}
+
+public interface ITeamLeader
+{
+    List<string> GetTeamMembers();
+}
+
+// Тестирование
+public class Program
+{
+    public static void Main(string[] args)
+    {
+        // Создание экземпляров
+        Employee employee = new Employee("Alice", "Developer", 50000);
+        Manager manager = new Manager("Bob", "Team Lead", 70000, "IT");
+        ProjectManager projectManager = new ProjectManager("Charlie", "Project Lead", 90000, "IT", "AI Project");
+
+        // Вызов PrintInfo
+        employee.PrintInfo();
+        Console.WriteLine();
+
+        manager.PrintInfo();
+        Console.WriteLine();
+
+        projectManager.PrintInfo();
+        Console.WriteLine();
+
+        // Тестирование интерфейсов
+        Console.WriteLine(projectManager.GenerateReport());
+        Console.WriteLine("Team Members: " + string.Join(", ", projectManager.GetTeamMembers()));
+    }
+}
